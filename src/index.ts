@@ -11,23 +11,47 @@
 // These initial Types are based on bindings that don't exist in the project yet,
 // you can follow the links to learn how to implement them.
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Env {
-	// Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-	// MY_KV_NAMESPACE: KVNamespace
-	//
-	// Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-	// MY_DURABLE_OBJECT: DurableObjectNamespace
-	//
-	// Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-	// MY_BUCKET: R2Bucket
+	BOT_TOKEN: string;
 }
 
-export const worker = {
+export default {
 	async fetch(
 		request: Request,
 		env: Env,
 		ctx: ExecutionContext
 	): Promise<Response> {
-		return new Response(`Hello World from ${request.method}!`);
+		const { BOT_TOKEN } = env;
+
+		try {
+			const {
+				message: {
+					from: { id: userId },
+					text,
+				},
+			} = (await request.json()) as any;
+
+			await fetch(
+				new Request(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						chat_id: userId,
+						text,
+					}),
+				})
+			);
+		} catch (e) {
+			console.error("Failed to parse JSON");
+			console.error(e);
+			return new Response("Not Ok");
+		}
+
+		console.log("300");
+
+		return new Response("Ok");
 	},
 };
