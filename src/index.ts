@@ -40,7 +40,7 @@ export default {
 					},
 					body: JSON.stringify({
 						chat_id: userId,
-						text,
+						text: text + "111",
 					}),
 				})
 			);
