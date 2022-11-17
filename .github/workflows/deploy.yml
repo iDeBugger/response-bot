@@ -17,8 +17,8 @@ jobs:
       - name: Initializing .env for wrangler
         run: |
           touch .env
-          "CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN" > .env
-          "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID" > .env
+          echo "CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN" > .env
+          echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID" > .env
       - name: Putting secrets to cloudflare
         run: echo "$BOT_TOKEN" | wrangler secrets put BOT_TOKEN
       - name: Publishing to Cloudflare
