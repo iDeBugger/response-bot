@@ -41,6 +41,4 @@ jobs:
         run: |
           set -xeuo pipefail
           url=$(cat wrangler_output.txt | grep -o "https://.*")
-          curl -X POST -H "Content-Type: application/json" --data-raw '{ \
-            "url": "'"$url"'" \
-          }' https://api.telegram.org/bot$BOT_TOKEN/setWebhook
+          curl -X POST -H "Content-Type: application/json" --data-raw '{ "url": "'"$url"'" }' https://api.telegram.org/bot$BOT_TOKEN/setWebhook
