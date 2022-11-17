@@ -20,19 +20,27 @@ jobs:
           node-version: 18
           cache: npm
       - name: Install wrangler
-        run: npm install -g wrangler@2.4.0
+        run: |
+          set -euo pipefail
+          npm install -g wrangler@2.4.0
       - name: Initializing .env for wrangler
         run: |
+          set -euo pipefail
           touch .env
           echo "CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN" > .env
           echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID" > .env
       - name: Putting secrets to cloudflare
-        run: echo "$BOT_TOKEN" | wrangler secret put BOT_TOKEN
+        run: |
+          set -euo pipefail
+          echo "$BOT_TOKEN" | wrangler secret put BOT_TOKEN
       - name: Publishing to Cloudflare
-        run: wrangler publish | tee wrangler_output.txt
+        run: |
+          set -euo pipefail
+          wrangler publish | tee wrangler_output.txt
       - name: Updating Telegram webhook
         run: |
-          url=$$(cat wrangler_output.txt | grep -o "https://.*")
+          set -euo pipefail
+          url=$(cat wrangler_output.txt | grep -o "https://.*")
           curl -X POST -H "Content-Type: application/json" --data-raw '{ \
             "url": "$$url" \
           }' https://api.telegram.org/bot$BOT_TOKEN/setWebhook
