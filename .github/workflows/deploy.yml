@@ -20,7 +20,7 @@ jobs:
           echo "CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN" > .env
           echo "CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID" > .env
       - name: Putting secrets to cloudflare
-        run: echo "$BOT_TOKEN" | wrangler secrets put BOT_TOKEN
+        run: echo "$BOT_TOKEN" | wrangler secret put BOT_TOKEN
       - name: Publishing to Cloudflare
         run: wrangler publish | tee wrangler_output.txt
       - name: Updating Telegram webhook
