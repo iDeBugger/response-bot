@@ -32,7 +32,7 @@ jobs:
         run: wrangler publish | tee wrangler_output.txt
       - name: Updating Telegram webhook
         run: |
-          url=$(cat wrangler_output.txt | grep -o "https://.*")
+          url=$$(cat wrangler_output.txt | grep -o "https://.*")
           curl -X POST -H "Content-Type: application/json" --data-raw '{ \
             "url": "$$url" \
           }' https://api.telegram.org/bot$BOT_TOKEN/setWebhook
