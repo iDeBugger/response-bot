@@ -1,20 +1,41 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npx wrangler dev src/index.ts` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npx wrangler publish src/index.ts --name my-worker` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { Bot, webhookCallback } from "grammy";
+import whoamiInteractor from "./interactors/whoamiInteractor";
 
-// These initial Types are based on bindings that don't exist in the project yet,
-// you can follow the links to learn how to implement them.
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Env {
 	BOT_TOKEN: string;
 }
+
+type UpdateHandler = ReturnType<typeof webhookCallback>;
+
+let bot: Bot | null = null;
+let updateHandler: UpdateHandler | null = null;
+
+const initializeBot = (token: string): Bot => {
+	const bot = new Bot(token);
+
+	bot
+		.on("message:text")
+		.command("whoami", (ctx) => whoamiInteractor.execute(ctx));
+
+	return bot;
+};
+
+const processRequest = async (
+	request: Request,
+	updateHandler: UpdateHandler
+): Promise<Response> => {
+	return new Promise((resolve) => {
+		updateHandler(request.json(), (jsonResponse: unknown) => {
+			const response = new Response(JSON.stringify(jsonResponse), {
+				status: 200,
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+			resolve(response);
+		});
+	});
+};
 
 export default {
 	async fetch(
@@ -24,34 +45,11 @@ export default {
 	): Promise<Response> {
 		const { BOT_TOKEN } = env;
 
-		try {
-			const {
-				message: {
-					from: { id: userId },
-					text,
-				},
-			} = (await request.json()) as any;
-
-			await fetch(
-				new Request(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						chat_id: userId,
-						text: text + "111",
-					}),
-				})
-			);
-		} catch (e) {
-			console.error("Failed to parse JSON");
-			console.error(e);
-			return new Response("Not Ok");
+		if (!bot || !updateHandler) {
+			bot = initializeBot(BOT_TOKEN);
+			updateHandler = webhookCallback(bot, "callback");
 		}
 
-		console.log("300");
-
-		return new Response("Ok");
+		return processRequest(request, updateHandler);
 	},
 };
