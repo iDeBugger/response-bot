@@ -19,6 +19,10 @@ jobs:
         with:
           node-version: 18
           cache: npm
+      - name: Install dependencies
+        run: |
+          set -xeuo pipefail
+          npm install
       - name: Install wrangler
         run: |
           set -xeuo pipefail
