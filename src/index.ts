@@ -15,7 +15,7 @@ container.bind<TelegramService>(TelegramService.tag).to(TelegramService);
 container.bind<WhoAmIInteractor>(WhoAmIInteractor.tag).to(WhoAmIInteractor);
 container.bind<WhoAmIFacade>(WhoAmIFacade.tag).to(WhoAmIFacade);
 
-const facades: Facade[] = [container.get(WhoAmIFacade)];
+const facades: Facade[] = [container.get(WhoAmIFacade.tag)];
 
 async function runInteractors(update: Update, env: Env) {
 	for (const facade of facades) {
