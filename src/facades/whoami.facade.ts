@@ -15,7 +15,11 @@ export class WhoAmIFacade implements Facade {
 	}
 
 	isProcessable(update: Update): boolean {
-		return isMessageUpdate(update) && !!update.message.from;
+		return (
+			isMessageUpdate(update) &&
+			!!update.message.from &&
+			update.message.text === "/whoami"
+		);
 	}
 
 	async process(update: Update, env: Env) {
