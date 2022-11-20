@@ -10,7 +10,7 @@ export interface Env {
 	BOT_TOKEN: string;
 }
 
-const container = new Container({ autoBindInjectable: true });
+const container = new Container();
 container.bind<TelegramService>(TelegramService.tag).to(TelegramService);
 container.bind<WhoAmIInteractor>(WhoAmIInteractor.tag).to(WhoAmIInteractor);
 container.bind<WhoAmIFacade>(WhoAmIFacade.tag).to(WhoAmIFacade);
