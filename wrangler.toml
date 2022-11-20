@@ -1,5 +1,4 @@
 main = "./src/index.ts"
 name = "worker-test"
 compatibility_date = "2022-11-17"
-node_compat = true
 workers_dev = true

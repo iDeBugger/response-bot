@@ -5,6 +5,8 @@ import { Update } from "../entities/update";
 
 @injectable()
 export class TelegramService {
+	static tag = Symbol.for(TelegramService.name);
+
 	private async makeTelegramRequest(
 		env: Env,
 		method: string,

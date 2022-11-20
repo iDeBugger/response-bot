@@ -10,12 +10,12 @@ export interface Env {
 	BOT_TOKEN: string;
 }
 
-const container = new Container();
-container.bind<WhoAmIInteractor>(WhoAmIInteractor).toSelf();
-container.bind<WhoAmIFacade>(WhoAmIFacade).toSelf();
-container.bind<TelegramService>(TelegramService).toSelf();
+const container = new Container({ autoBindInjectable: true });
+container.bind<TelegramService>(TelegramService.tag).to(TelegramService);
+container.bind<WhoAmIInteractor>(WhoAmIInteractor.tag).to(WhoAmIInteractor);
+container.bind<WhoAmIFacade>(WhoAmIFacade.tag).to(WhoAmIFacade);
 
-const facades: Facade[] = [container.resolve(WhoAmIFacade)];
+const facades: Facade[] = [container.get(WhoAmIFacade)];
 
 async function runInteractors(update: Update, env: Env) {
 	for (const facade of facades) {
