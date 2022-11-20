@@ -1,41 +1,29 @@
-import { Bot, webhookCallback } from "grammy";
-import whoamiInteractor from "./interactors/whoamiInteractor";
+import "reflect-metadata";
+import { Container } from "inversify";
+import { WhoAmIFacade } from "./facades/whoami.facade";
+import { WhoAmIInteractor } from "./interactors/whoAm.interactor";
+import { TelegramService } from "./services/telegram.service";
+import { Facade } from "./facades/facadeTypes";
+import { Update } from "./entities/update";
 
 export interface Env {
 	BOT_TOKEN: string;
 }
 
-type UpdateHandler = ReturnType<typeof webhookCallback>;
+const container = new Container();
+container.bind<WhoAmIInteractor>(WhoAmIInteractor).toSelf();
+container.bind<WhoAmIFacade>(WhoAmIFacade).toSelf();
+container.bind<TelegramService>(TelegramService).toSelf();
 
-let bot: Bot | null = null;
-let updateHandler: UpdateHandler | null = null;
+const facades: Facade[] = [container.resolve(WhoAmIFacade)];
 
-const initializeBot = (token: string): Bot => {
-	const bot = new Bot(token);
-
-	bot
-		.on("message:text")
-		.command("whoami", (ctx) => whoamiInteractor.execute(ctx));
-
-	return bot;
-};
-
-const processRequest = async (
-	request: Request,
-	updateHandler: UpdateHandler
-): Promise<Response> => {
-	return new Promise((resolve) => {
-		updateHandler(request.json(), (jsonResponse: unknown) => {
-			const response = new Response(JSON.stringify(jsonResponse), {
-				status: 200,
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			resolve(response);
-		});
-	});
-};
+async function runInteractors(update: Update, env: Env) {
+	for (const facade of facades) {
+		if (facade.isProcessable(update)) {
+			await facade.process(update, env);
+		}
+	}
+}
 
 export default {
 	async fetch(
@@ -43,13 +31,12 @@ export default {
 		env: Env,
 		ctx: ExecutionContext
 	): Promise<Response> {
-		const { BOT_TOKEN } = env;
+		const rawUpdate = await request.json();
+		const update = Update.parse(rawUpdate);
+		await runInteractors(update, env);
 
-		if (!bot || !updateHandler) {
-			bot = initializeBot(BOT_TOKEN);
-			updateHandler = webhookCallback(bot, "callback");
-		}
-
-		return processRequest(request, updateHandler);
+		return new Response(null, {
+			status: 200,
+		});
 	},
 };
